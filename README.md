@@ -29,7 +29,7 @@ After having set `rvae_config.json` (resp. `bpr_config.json`), execute `python r
 If you wish to execute the ensemble, follow these steps:
   - Execute a run of RVAE (resp. BPR) setting "model_type" parameter equal to "model_types.LOW" and "copy_pasting_data" equal to "True".
   - Repeat the same, but sets "model_type" equal to "model_types.BASELINE".
-  - Configure the `ensemble_config.json` by properly setting the "algorithm" field to either "rvae" or "bpr", and "ensemble_weight" to the weight you wish to use.
+  - Configure the `ensemble_config.json` by properly setting the "algorithm" field to either "rvae" or "bpr" and "ensemble_weight" to the weight you wish to use.
   - Execute `python ensemble.py ensemble_config.json`
 
 
