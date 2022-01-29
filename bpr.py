@@ -143,18 +143,6 @@ elif config.regularizer == "PD":
     else:
         torch_pop = torch.tensor([elem ** float(config.reg_weight) for elem in popularity]).float()
     torch_pop.requires_grad = False
-elif config.regularizer == "PC":
-    if CUDA:
-        torch_pop = torch.tensor(popularity).float().cuda()
-        torch_abs_pop = torch.tensor(abs_frequencies).float().cuda()
-        torch_n_items = torch.tensor([n_items] * config.batch_size).float().cuda()
-    else:
-        torch_pop = torch.tensor(popularity).float()
-        torch_abs_pop = torch.tensor(abs_frequencies).float()
-        torch_n_items = torch.tensor([n_items] * config.batch_size).float()
-    torch_pop.requires_grad = False
-    torch_abs_pop.requires_grad = False
-    torch_n_items.requires_grad = False
 
 
 def train(dataloader, epoch, optimizer):
