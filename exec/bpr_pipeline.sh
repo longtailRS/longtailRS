@@ -1,9 +1,9 @@
-# pick dataset(s) of interest - MOVIELENS_1M MOVIELENS_20M CITEULIKE PINTEREST EPINIONS NETFLIX YAHOO COAT AMAZON_GGF
-declare -a datasets=("YAHOO")
-declare -A datasets_path_name=( ["MOVIELENS_1M"]="ml-1m" ["MOVIELENS_20M"]="ml-20m" ["CITEULIKE"]="citeulike-a" ["PINTEREST"]="pinterest" ["EPINIONS"]="epinions" ["NETFLIX"]="netflix", ["YAHOO"]="yahoo-r3", ["COAT"]="coat",  ["AMAZON_GGF"]="amzn-ggf")
-declare -A dataset2alpha=( ["MOVIELENS_1M"]="0.01" ["MOVIELENS_20M"]="0.0025" ["CITEULIKE"]="0.05" ["PINTEREST"]="0.05" ["EPINIONS"]="0.1" ["NETFLIX"]="0.0005", ["YAHOO"]="0.02", ["COAT"]="0.5",  ["AMAZON_GGF"]="0.01")
-declare -A dataset2gamma=( ["MOVIELENS_1M"]="53.33" ["MOVIELENS_20M"]="10" ["CITEULIKE"]="6.67" ["PINTEREST"]="10" ["EPINIONS"]="6.67" ["NETFLIX"]="10", ["YAHOO"]="10", ["COAT"]="7.0",  ["AMAZON_GGF"]="23.33")
-declare -A dataset2latent_dim=( ["MOVIELENS_1M"]="64" ["MOVIELENS_20M"]="10" ["CITEULIKE"]="128" ["PINTEREST"]="128" ["EPINIONS"]="6.67" ["NETFLIX"]="10", ["YAHOO"]="32", ["COAT"]="7.0",  ["AMAZON_GGF"]="256")
+# pick dataset(s) of interest - MOVIELENS_1M CITEULIKE PINTEREST YAHOO AMAZON_GGF
+declare -a datasets=("MOVIELENS_1M" "CITEULIKE" "PINTEREST" "AMAZON_GGF")
+declare -A datasets_path_name=( ["MOVIELENS_1M"]="ml-1m" ["CITEULIKE"]="citeulike-a" ["PINTEREST"]="pinterest" ["YAHOO"]="yahoo-r3" ["AMAZON_GGF"]="amzn-ggf")
+declare -A dataset2alpha=( ["MOVIELENS_1M"]="0.01" ["CITEULIKE"]="0.05" ["PINTEREST"]="0.05" ["YAHOO"]="0.02" ["AMAZON_GGF"]="0.01")
+declare -A dataset2gamma=( ["MOVIELENS_1M"]="53.33" ["CITEULIKE"]="6.67" ["PINTEREST"]="10" ["YAHOO"]="10" ["AMAZON_GGF"]="23.33")
+declare -A dataset2latent_dim=( ["MOVIELENS_1M"]="64" ["CITEULIKE"]="128" ["PINTEREST"]="128" ["YAHOO"]="32" ["AMAZON_GGF"]="256")
 
 
 cuda="2"
@@ -23,8 +23,8 @@ for seed in "${seeds[@]}"; do
     jsonStr=$(cat $bpr_config_file)
     jq '.seed = '$seed <<<"$jsonStr" > $bpr_config_file
     jsonStr=$(cat $bpr_config_file)
-    # jq '.latent_dim = "'${dataset2latent_dim[$dataset_name]}'"' <<<"$jsonStr" > $bpr_config_file
-    # jsonStr=$(cat $bpr_config_file)
+    jq '.latent_dim = "'${dataset2latent_dim[$dataset_name]}'"' <<<"$jsonStr" > $bpr_config_file
+    jsonStr=$(cat $bpr_config_file)
     jq '.dataset_name = "datasets.'$dataset_name'"' <<<"$jsonStr" > $bpr_config_file
     jsonStr=$(cat $bpr_config_file)
     jq '.model_type = "model_types.BASELINE"' <<<"$jsonStr" > $bpr_config_file
@@ -46,8 +46,8 @@ for seed in "${seeds[@]}"; do
       jsonStr=$(cat $ensemble_config_file)
       jq '.ensemble_weight = '$new_ensemble_weight <<<"$jsonStr" > $ensemble_config_file
       jsonStr=$(cat $ensemble_config_file)
-      # jq '.latent_dim = "'${dataset2latent_dim[$dataset_name]}'"' <<<"$jsonStr" > $ensemble_config_file
-      # jsonStr=$(cat $ensemble_config_file)
+      jq '.latent_dim = "'${dataset2latent_dim[$dataset_name]}'"' <<<"$jsonStr" > $ensemble_config_file
+      jsonStr=$(cat $ensemble_config_file)
       jq '.algorithm = "bpr"' <<<"$jsonStr" > $ensemble_config_file
       jsonStr=$(cat $ensemble_config_file)
       jq '.seed = '$seed <<<"$jsonStr" > $ensemble_config_file
