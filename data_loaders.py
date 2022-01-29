@@ -702,10 +702,6 @@ class CachedDataLoader(DataLoader):
             max_popularity = max(item_popularity)
 
             h = 1
-            if "ml-20m" in self.file_tr:
-                h = 0.12
-            if "netflix" in self.file_tr:
-                h = 0.04
             self.h = h
             for idx in range(len(item_popularity)):
                 f_i = item_popularity[idx]
@@ -1810,10 +1806,6 @@ class BprDataLoader:
             for idx in range(len(item_popularity)):
                 f_i = item_popularity[idx]
                 h = 1
-                if "ml-20m" in self.file_tr:
-                    h = ML20M_H_FACTOR
-                if "netflix" in self.file_tr:
-                    h = NETFLIX_H_FACTOR
                 d_i = ceil((item_ranking[idx] / (self.high_pop * h)) + 1)
                 if f_i > 0:
                     if self.model_type == model_types.OVERSAMPLING:
