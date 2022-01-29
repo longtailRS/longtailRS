@@ -33,7 +33,6 @@ config.p_dims = eval(config.p_dims)
 config.alpha = eval(config.alpha)
 config.gamma = eval(config.gamma)
 reg_weight = float(config.reg_weight)
-pc_weight = float(config.pc_weight)
 if config.gamma:
     config.gamma = float(config.gamma)
 if config.alpha:
@@ -83,15 +82,7 @@ to_pickle = True
 if not config.cached_dataloader:
     print(f"Model: {model_type}\nData Loader: {config.data_loader_type}")
     if model_type == model_types.BASELINE:
-        if config.data_loader_type == "inverse_ppr":
-            trainloader = data_loaders.InversePersonalizedPagerankNegativeSamplingDataLoader(dataset_file, seed=SEED,
-                                                                                             decreasing_factor=1,
-                                                                                             model_type=model_type)
-        elif config.data_loader_type == "ppr":
-            trainloader = data_loaders.PersonalizedPagerankNegativeSamplingDataLoader(dataset_file, seed=SEED,
-                                                                                      decreasing_factor=1,
-                                                                                      model_type=model_type)
-        elif config.data_loader_type == "jannach":
+        if config.data_loader_type == "jannach":
             trainloader = data_loaders.JannachDataLoader(file_tr=dataset_file, seed=SEED, decreasing_factor=1,
                                                          model_type=model_type,
                                                          width_param=WIDTH_PARAM)
@@ -99,42 +90,10 @@ if not config.cached_dataloader:
             trainloader = data_loaders.BorattoNegativeSamplingDataLoader(file_tr=dataset_file, seed=SEED,
                                                                          decreasing_factor=1,
                                                                          model_type=model_type)
-        elif config.data_loader_type == "negative":
-            trainloader = data_loaders.NegativeSamplingDataLoader(dataset_file, seed=SEED, decreasing_factor=1,
-                                                                  model_type=model_type)
-        elif config.data_loader_type == "word2vec":
-            trainloader = data_loaders.Word2VecNegativeSamplingDataLoader(file_tr=dataset_file, seed=SEED,
-                                                                          decreasing_factor=1,
-                                                                          model_type=model_type,
-                                                                          beta_sampling=BETA_SAMPLING)
-        elif config.data_loader_type == "stream":
-            trainloader = stream_data_loaders.StreamDataLoader(dataset_file, seed=SEED, decreasing_factor=1,
-                                                               model_type=model_type)
-        elif config.data_loader_type == "2stages":
-            trainloader = stream_data_loaders.TwoStagesNegativeSamplingDataLoader(file_tr=dataset_file, seed=SEED,
-                                                                                  decreasing_factor=1,
-                                                                                  model_type=model_type,
-                                                                                  beta_sampling=BETA_SAMPLING,
-                                                                                  device=device,
-                                                                                  model=None, model_class="rvae")
         else:
             trainloader = data_loaders.DataLoader(dataset_file, seed=SEED, decreasing_factor=1, model_type=model_type)
     else:
-        if config.data_loader_type == "inverse_ppr":
-            trainloader = data_loaders.InversePersonalizedPagerankNegativeSamplingDataLoader(dataset_file,
-                                                                                             seed=SEED,
-                                                                                             decreasing_factor=config.decreasing_factor,
-                                                                                             model_type=model_type,
-                                                                                             alpha=config.alpha,
-                                                                                             gamma=config.gamma)
-        elif config.data_loader_type == "ppr":
-            trainloader = data_loaders.PersonalizedPagerankNegativeSamplingDataLoader(dataset_file,
-                                                                                      seed=SEED,
-                                                                                      decreasing_factor=config.decreasing_factor,
-                                                                                      model_type=model_type,
-                                                                                      alpha=config.alpha,
-                                                                                      gamma=config.gamma)
-        elif config.data_loader_type == "jannach":
+        if config.data_loader_type == "jannach":
             trainloader = data_loaders.JannachDataLoader(dataset_file, seed=SEED,
                                                          decreasing_factor=config.decreasing_factor,
                                                          model_type=model_type, alpha=config.alpha, gamma=config.gamma,
@@ -144,31 +103,6 @@ if not config.cached_dataloader:
                                                                          decreasing_factor=config.decreasing_factor,
                                                                          model_type=model_type, alpha=config.alpha,
                                                                          gamma=config.gamma)
-        elif config.data_loader_type == "negative":
-            trainloader = data_loaders.NegativeSamplingDataLoader(dataset_file, seed=SEED,
-                                                                  decreasing_factor=config.decreasing_factor,
-                                                                  model_type=model_type, alpha=config.alpha,
-                                                                  gamma=config.gamma)
-        elif config.data_loader_type == "word2vec":
-            trainloader = data_loaders.Word2VecNegativeSamplingDataLoader(dataset_file, seed=SEED,
-                                                                          decreasing_factor=config.decreasing_factor,
-                                                                          model_type=model_type, alpha=config.alpha,
-                                                                          gamma=config.gamma,
-                                                                          beta_sampling=BETA_SAMPLING)
-        elif config.data_loader_type == "stream":
-            trainloader = stream_data_loaders.StreamDataLoader(dataset_file, seed=SEED,
-                                                               decreasing_factor=config.decreasing_factor,
-                                                               model_type=model_type, alpha=config.alpha,
-                                                               gamma=config.gamma)
-        elif config.data_loader_type == "2stages":
-            trainloader = stream_data_loaders.TwoStagesNegativeSamplingDataLoader(file_tr=dataset_file, seed=SEED,
-                                                                                  decreasing_factor=config.decreasing_factor,
-                                                                                  model_type=model_type,
-                                                                                  alpha=config.alpha,
-                                                                                  gamma=config.gamma,
-                                                                                  beta_sampling=BETA_SAMPLING,
-                                                                                  device=device,
-                                                                                  model=None, model_class="rvae")
         else:
             trainloader = data_loaders.DataLoader(dataset_file, seed=SEED, decreasing_factor=config.decreasing_factor,
                                                   model_type=model_type, alpha=config.alpha, gamma=config.gamma)
@@ -190,22 +124,7 @@ frequencies = trainloader.frequencies_dict["training"]
 
 print(f"\nRegularizer: {config.regularizer}")
 
-if config.regularizer == "JS":
-    def _determine_class_pop(freq, th):
-        if freq <= th[0]:
-            return 0
-        elif freq > th[1]:
-            return 2
-        else:
-            return 1
-
-
-    pop_mapping = torch.zeros(size=(n_items, 3))
-    pop_mapping = pop_mapping.to(device)
-    for i in range(len(abs_frequencies)):
-        pop_mapping[i, _determine_class_pop(abs_frequencies[i], abs_thresholds)] = 1
-    pop_mapping.requires_grad = False
-elif config.regularizer == "boratto":
+if config.regularizer == "boratto":
     if CUDA:
         torch_pop = torch.tensor(popularity).float().cuda()
     else:
@@ -218,18 +137,6 @@ elif config.regularizer == "PD":
     else:
         torch_pop = torch.tensor([elem ** float(config.reg_weight) for elem in popularity]).float()
     torch_pop.requires_grad = False
-elif config.regularizer == "PC":
-    if CUDA:
-        torch_pop = torch.tensor(popularity).float().cuda()
-        torch_abs_pop = torch.tensor(abs_frequencies).float().cuda()
-        torch_n_items = torch.tensor([n_items] * config.batch_size).float().cuda()
-    else:
-        torch_pop = torch.tensor(popularity).float()
-        torch_abs_pop = torch.tensor(abs_frequencies).float()
-        torch_n_items = torch.tensor([n_items] * config.batch_size).float()
-    torch_pop.requires_grad = False
-    torch_abs_pop.requires_grad = False
-    torch_n_items.requires_grad = False
 
 
 def train(dataloader, epoch, optimizer):
@@ -272,29 +179,10 @@ def train(dataloader, epoch, optimizer):
         if config.regularizer == "PD":
             y = elu_func(y) + 1
             y = torch.einsum('bi,i -> bi', y, torch_pop)
-        elif config.regularizer == "PC":
-            denominator = torch_n_items[:x.shape[0]] - x.sum(dim=0)
-            n_u = torch.norm(torch.einsum('bi, b -> bi', (torch.einsum('bi, bi -> bi', y, 1 - x)), 1/denominator), \
-                             p='fro', dim=0)
-            c = torch.einsum('bi, i -> bi', (y*config.reg_weight + (1-reg_weight)), 1/torch_abs_pop)
-            m_u = torch.norm(torch.einsum('bi, b -> bi', torch.einsum('bi, bi->bi', c, 1-x), 1/denominator), \
-                             p='fro', dim=0)
-            y = torch.einsum('bi, bi -> bi', y, c*pc_weight*n_u/m_u)
-
 
         loss = criterion.log_p(x, y, pos_items=pos_items, neg_items=neg_items, mask=mask, model_type=model_type)
 
-        if config.regularizer == "JS":
-            foldin_mask = (x == 1).float()
-            topk_scores, topk_items = torch.topk(torch.einsum('bi,bi -> bi', y, foldin_mask), 100)
-            topk_pop_distro = torch.einsum('bi, bic -> bc', topk_scores, pop_mapping[topk_items])
-            norm_topk_pop_distro = js_div_2d(topk_pop_distro)
-            foldin_pop = torch.einsum('bi,ic -> bc', x, pop_mapping)
-            foldin_pop = foldin_pop.float()
-            norm_foldin_pop = js_div_2d(foldin_pop)
-            loss += js_div_2d(norm_topk_pop_distro.unsqueeze(0).unsqueeze(0) + 1e-10,
-                              norm_foldin_pop.unsqueeze(0).unsqueeze(0) + 1e-10)[0, 0] * reg_weight
-        elif config.regularizer == "boratto":
+        if config.regularizer == "boratto":
             # computing the absolute correlation
             vx = loss - torch.mean(loss)
             vy = torch_pop[pos_items.long()] - torch.mean(torch_pop[pos_items.long()])
@@ -368,17 +256,7 @@ def evaluate(dataloader, popularity, tag='validation'):
             #            loss = criterion(recon_batch, x_input, pos, neg, mask, mask, mu, logvar)
             loss = criterion.log_p(x_input, y, pos_items=pos, neg_items=neg, mask=mask, model_type=model_type)
 
-            if config.regularizer == "JS":
-                foldin_mask = (x_input == 1).float()
-                topk_scores, topk_items = torch.topk(torch.einsum('bi,bi -> bi', y, foldin_mask), 100)
-                topk_pop_distro = torch.einsum('bi, bic -> bc', topk_scores, pop_mapping[topk_items])
-                norm_topk_pop_distro = normalize_distr(topk_pop_distro)
-                foldout_pop = torch.einsum('bi,ic -> bc', mask_te, pop_mapping)
-                foldout_pop = foldout_pop.float()
-                norm_foldout_pop = normalize_distr(foldout_pop)
-                loss += js_div_2d(norm_topk_pop_distro.unsqueeze(0).unsqueeze(0) + 1e-10,
-                                  norm_foldout_pop.unsqueeze(0).unsqueeze(0) + 1e-10)[0, 0] * js_reg
-            elif config.regularizer == "boratto":
+            if config.regularizer == "boratto":
                 # computing the absolute correlation
                 vx = loss - torch.mean(loss)
                 vy = torch_pop[pos.long()] - torch.mean(torch_pop[pos.long()])
@@ -470,14 +348,8 @@ try:
         print(ss)
         print('-' * ls)
 
-        # Save the model if the n100 is the best we've seen so far.
-        '''
-        if best_loss > result['loss']:
-            torch.save(model.state_dict(), file_model)
-            best_loss = result['loss']
-        '''
         LOW, MED, HIGH = 0, 1, 2
-        if model_type in (model_types.BASELINE, model_types.REWEIGHTING, model_types.OVERSAMPLING, model_types.U_SAMPLING):
+        if model_type in (model_types.BASELINE, model_types.REWEIGHTING, model_types.OVERSAMPLING):
             val_result = result["loss"]
             if np.isinf(val_result) or np.isnan(val_result):
                 val_result = -float(result[f"luciano_stat@{config.best_model_k_metric}"])
