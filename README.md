@@ -12,7 +12,7 @@ To be able to effectively reproduce our results, follow these steps:
 If you wish to execute single runs, customize `rvae_config.json` (resp. `bpr_config.json`) with the following parameters:
   - "CUDA_VISIBLE_DEVICES": the Cuda GPU ID if you have available one, otherwise an empty string to use CPU.
   - "dataset_name": dataset on which you want to adopt, for the names have a look at the `datasets_info.json` file.
-  - "model_type": for our methods pick on in \{BASELINE, REWEIGHTING, OVERSAMPLING\}. For competitors, use `model_types.BASELINE`.
+  - "model_type": for our methods pick in \{BASELINE, REWEIGHTING, OVERSAMPLING\}. For competitors, use `model_types.BASELINE`.
   - "copy_pasting_data": either "True" or "False" to copy the results in the main folder (minor parameter).
   - "alpha"/"gamma": parameters for Reweighting scheme. Only relevant when the model type is `REWEIGHTING`. If both are set to 'None' you are using IPS.
   - "latent_dim": only present for BPR. It represents the latent dimension of the embeddings.
